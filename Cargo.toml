@@ -1,3 +1,7 @@
+[workspace]
+members = ["bindings/core", "."]
+resolver = "2"
+
 
 [package]
 authors = ["nemurubaka <cijiugechu@gmail.com>"]
