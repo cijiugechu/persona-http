@@ -71,31 +71,18 @@ pub struct WebSocketInit {
   pub interface: Option<String>,
 }
 
+#[derive(Default)]
 pub struct ParsedRequest {
   pub method: Option<Method>,
   pub request: Request,
 }
 
+#[derive(Default)]
 pub struct ParsedWebSocketRequest {
   pub request: WebSocketRequest,
 }
 
-impl Default for ParsedRequest {
-  fn default() -> Self {
-    Self {
-      method: None,
-      request: Request::default(),
-    }
-  }
-}
 
-impl Default for ParsedWebSocketRequest {
-  fn default() -> Self {
-    Self {
-      request: WebSocketRequest::default(),
-    }
-  }
-}
 
 impl RequestInit {
   pub fn parse(self) -> NapiResult<ParsedRequest> {
