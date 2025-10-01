@@ -5,12 +5,8 @@ pub mod response;
 pub mod websocket;
 
 pub use client::{
-    execute_request,
-    execute_websocket_request,
-    Client,
-    ClientBuilder,
-    HickoryDnsResolver,
-    TlsVerification,
+  execute_request, execute_websocket_request, Client, ClientBuilder, HickoryDnsResolver,
+  TlsVerification,
 };
 pub use error::Error;
 pub use request::{Request, WebSocketRequest};

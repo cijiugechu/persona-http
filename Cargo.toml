@@ -2,7 +2,6 @@
 members = ["bindings/core", "."]
 resolver = "2"
 
-
 [package]
 authors = ["nemurubaka <cijiugechu@gmail.com>"]
 edition = "2021"
@@ -13,13 +12,14 @@ version = "0.1.0"
 crate-type = ["cdylib"]
 
 [dependencies]
-napi = "3.0.0"
-napi-derive = "3.0.0"
+napi = { version = "3.3.0", features = ["tokio_rt", "serde-json"] }
+napi-derive = "3.2.5"
 tokio = { version = "1.47", features = ["sync", "rt", "rt-multi-thread", "time"]}
 futures = "0.3"
 futures-util = { version = "0.3.31", default-features = false }
 pin-project-lite = "0.2.16"
 serde = { version = "1.0.219", features = ["derive"] }
+serde_json = "1.0.132"
 indexmap = { version = "2.10.0", features = ["serde"] }
 bytes = "1.10.1"
 arc-swap = "1.7.0"
@@ -39,8 +39,7 @@ wreq = { version = "6.0.0-rc.20", features = [
     "ws",
 ] }
 wreq-util = { version = "3.0.0-rc.5", features = ["emulation-rand"] }
-hickory-resolver = "0.25.2"
-cookie = "0.18"
+rnet_bindings_core = { path = "bindings/core" }
 
 [build-dependencies]
 napi-build = "2"

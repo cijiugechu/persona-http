@@ -32,16 +32,16 @@ const __sharedMemory = new WebAssembly.Memory({
   shared: true,
 })
 
-let __wasmFilePath = __nodePath.join(__dirname, 'package-template.wasm32-wasi.wasm')
-const __wasmDebugFilePath = __nodePath.join(__dirname, 'package-template.wasm32-wasi.debug.wasm')
+let __wasmFilePath = __nodePath.join(__dirname, 'rnet-node.wasm32-wasi.wasm')
+const __wasmDebugFilePath = __nodePath.join(__dirname, 'rnet-node.wasm32-wasi.debug.wasm')
 
 if (__nodeFs.existsSync(__wasmDebugFilePath)) {
   __wasmFilePath = __wasmDebugFilePath
 } else if (!__nodeFs.existsSync(__wasmFilePath)) {
   try {
-    __wasmFilePath = __nodePath.resolve('@napi-rs/package-template-pnpm-wasm32-wasi')
+    __wasmFilePath = __nodePath.resolve('rnet-node-wasm32-wasi')
   } catch {
-    throw new Error('Cannot find package-template.wasm32-wasi.wasm file, and @napi-rs/package-template-pnpm-wasm32-wasi package is not installed.')
+    throw new Error('Cannot find rnet-node.wasm32-wasi.wasm file, and rnet-node-wasm32-wasi package is not installed.')
   }
 }
 
@@ -108,4 +108,13 @@ const { instance: __napiInstance, module: __wasiModule, napiModule: __napiModule
   },
 })
 module.exports = __napiModule.exports
-module.exports.plus100 = __napiModule.exports.plus100
+module.exports.Client = __napiModule.exports.Client
+module.exports.ResponseHandle = __napiModule.exports.ResponseHandle
+module.exports.delete_ = __napiModule.exports.delete_
+module.exports.get = __napiModule.exports.get
+module.exports.head = __napiModule.exports.head
+module.exports.options = __napiModule.exports.options
+module.exports.patch = __napiModule.exports.patch
+module.exports.post = __napiModule.exports.post
+module.exports.put = __napiModule.exports.put
+module.exports.request = __napiModule.exports.request

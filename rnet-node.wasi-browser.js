@@ -11,7 +11,7 @@ const __wasi = new __WASI({
   version: 'preview1',
 })
 
-const __wasmUrl = new URL('./package-template.wasm32-wasi.wasm', import.meta.url).href
+const __wasmUrl = new URL('./rnet-node.wasm32-wasi.wasm', import.meta.url).href
 const __emnapiContext = __emnapiGetDefaultContext()
 
 
@@ -56,4 +56,13 @@ const {
   },
 })
 export default __napiModule.exports
-export const plus100 = __napiModule.exports.plus100
+export const Client = __napiModule.exports.Client
+export const ResponseHandle = __napiModule.exports.ResponseHandle
+export const delete_ = __napiModule.exports.delete_
+export const get = __napiModule.exports.get
+export const head = __napiModule.exports.head
+export const options = __napiModule.exports.options
+export const patch = __napiModule.exports.patch
+export const post = __napiModule.exports.post
+export const put = __napiModule.exports.put
+export const request = __napiModule.exports.request

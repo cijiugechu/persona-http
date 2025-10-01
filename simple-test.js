@@ -1,5 +1,3 @@
-const { plus100 } = require('./index')
+const { get } = require('./index')
 
-console.assert(plus100(0) === 100, 'Simple test failed')
-
-console.info('Simple test passed')
+get('https://www.google.com').then(r => r.text()).then(console.log)
