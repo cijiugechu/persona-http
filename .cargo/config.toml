@@ -1,3 +1,8 @@
+[env]
+CFLAGS_x86_64_unknown_linux_musl = "-DOPENSSL_NO_ASM"
+CXXFLAGS_x86_64_unknown_linux_musl = "-DOPENSSL_NO_ASM"
+ASMFLAGS_x86_64_unknown_linux_musl = "-DOPENSSL_NO_ASM"
+
 [target.x86_64-pc-windows-msvc]
 rustflags = ["-C", "target-feature=+crt-static"]
 

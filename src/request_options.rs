@@ -82,8 +82,6 @@ pub struct ParsedWebSocketRequest {
   pub request: WebSocketRequest,
 }
 
-
-
 impl RequestInit {
   pub fn parse(self) -> NapiResult<ParsedRequest> {
     let mut request = Request::default();

@@ -18,9 +18,9 @@ pub struct HickoryDnsResolver {
 }
 
 impl Default for HickoryDnsResolver {
-    fn default() -> Self {
-        Self::new()
-    }
+  fn default() -> Self {
+    Self::new()
+  }
 }
 
 impl HickoryDnsResolver {
