@@ -1,12 +1,12 @@
 {
-  "name": "@napi-rs/package-template-pnpm",
+  "name": "rnet-node",
   "version": "1.1.1",
-  "description": "Template project for writing node package with napi-rs",
+  "description": "Rnet node package",
   "main": "index.js",
   "types": "index.d.ts",
   "browser": "browser.js",
   "repository": {
-    "url": "git+ssh://git@github.com/napi-rs/package-template-pnpm.git",
+    "url": "git+ssh://git@github.com/cijiugechu/rnet-node.git",
     "type": "git"
   },
   "license": "MIT",
@@ -24,7 +24,7 @@
     "browser.js"
   ],
   "napi": {
-    "binaryName": "package-template",
+    "binaryName": "rnet-node",
     "targets": [
       "x86_64-apple-darwin",
       "aarch64-apple-darwin",
