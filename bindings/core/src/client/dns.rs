@@ -17,6 +17,12 @@ pub struct HickoryDnsResolver {
   resolver: &'static LazyLock<TokioResolver>,
 }
 
+impl Default for HickoryDnsResolver {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl HickoryDnsResolver {
   /// Create a new resolver with the default configuration.
   pub fn new() -> HickoryDnsResolver {
