@@ -94,11 +94,7 @@ impl Client {
   }
 
   #[napi]
-  pub async fn patch(
-    &self,
-    url: String,
-    init: Option<RequestInit>,
-  ) -> Result<ResponseHandle> {
+  pub async fn patch(&self, url: String, init: Option<RequestInit>) -> Result<ResponseHandle> {
     perform_request(
       Some(self.inner.clone()),
       url,
@@ -110,11 +106,7 @@ impl Client {
   }
 
   #[napi]
-  pub async fn delete(
-    &self,
-    url: String,
-    init: Option<RequestInit>,
-  ) -> Result<ResponseHandle> {
+  pub async fn delete(&self, url: String, init: Option<RequestInit>) -> Result<ResponseHandle> {
     perform_request(
       Some(self.inner.clone()),
       url,
@@ -138,11 +130,7 @@ impl Client {
   }
 
   #[napi]
-  pub async fn options(
-    &self,
-    url: String,
-    init: Option<RequestInit>,
-  ) -> Result<ResponseHandle> {
+  pub async fn options(&self, url: String, init: Option<RequestInit>) -> Result<ResponseHandle> {
     perform_request(
       Some(self.inner.clone()),
       url,

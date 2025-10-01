@@ -3,6 +3,7 @@
 This note captures the important pieces of the current PyO3-based bindings under `py/` and outlines the lowest-risk path for porting the bindings to [`napi-rs`](https://napi.rs/).
 
 ## 1. Current Binding Layout
+
 - `py/src/lib.rs`: entry point that registers every class and free function exposed to Python (`get`, `post`, etc.) and wires submodules (`http1`, `http2`, `tls`, `header`, `cookie`, `emulation`, `blocking`, `exceptions`).
 - `py/src/bridge/`: adapters between Python's asyncio loop and the shared Tokio runtime. `Runtime` wraps `tokio::runtime::Runtime`, `future_into_py` turns Rust futures into awaitables, and `sync.rs`/`task.rs` handle cancellation, contextvars, and cross-thread messaging.
 - `py/src/client/`: the main HTTP/WebSocket API. Key pieces:
@@ -20,6 +21,7 @@ This note captures the important pieces of the current PyO3-based bindings under
 The compiled module is surfaced to Python via `python/rnet/`, which mostly re-exports the Rust-backed classes.
 
 ## 2. Public API Surface (PyO3)
+
 - **Top-level HTTP helpers** (`get`, `post`, `put`, `patch`, `delete`, `head`, `options`, `trace`, `request`): async functions calling `execute_request` and returning awaitables.
 - **WebSocket helper** (`websocket`): async wrapper over `execute_websocket_request`.
 - **`Client` / `BlockingClient`**: expose per-instance methods mirroring the free helpers plus configuration via keyword arguments (`Client::new(**kwds)`). Builder supports emulation, headers, cookies, timeouts, pool tuning, protocol selection, TLS, proxies, compression, TCP tuning.
@@ -29,12 +31,14 @@ The compiled module is surfaced to Python via `python/rnet/`, which mostly re-ex
 - **Exceptions**: mapped 1:1 from `wreq::Error` categories (`RequestError`, `TimeoutError`, etc.) plus runtime errors (`RustPanic`, `DNSResolverError`).
 
 ## 3. Supporting Infrastructure
+
 - **Tokio runtime bridge**: `Runtime::future_into_py` + `NoGIL` ensure async work runs on a shared multi-threaded runtime while releasing the GIL. Cancellation propagates through `Cancellable`, `PyDoneCallback`, and Python `asyncio.Future` callbacks.
 - **Extractor layer**: centralizes Python→Rust conversions and is heavily tied to `PyAny` / `PyDict` APIs.
 - **Zero-copy buffers**: `PyBuffer` exposes response bodies and header values without reallocating.
 - **Streaming bodies**: request bodies accept sync/async iterables by wrapping them into Rust `Stream`s via runtime adapters.
 
 ## 4. Data Flow Summary
+
 1. Python code calls a free function or a `Client` method.
 2. Builder/extractor modules translate kwargs into `wreq` builders (`ClientBuilder`, `RequestBuilder`).
 3. Operations run on the shared Tokio runtime; futures are turned into Python awaitables (or executed synchronously for blocking variants).
@@ -42,6 +46,7 @@ The compiled module is surfaced to Python via `python/rnet/`, which mostly re-ex
 5. Errors bubble through the central `Error` enum to unified exception classes.
 
 ## 5. Migration Considerations for napi-rs
+
 - **Attribute macros**: `#[pyclass]`, `#[pymethods]`, `#[pyfunction]`, `#[pymodule]` will need napi equivalents (`#[napi]`, `#[module_exports]`, `napi::Result`). The Rust structs already isolate most logic, but constructors/methods depend on PyO3 glue (`Python`, `PyBackedStr`, `PyResult`).
 - **Runtime bridge**: asyncio/GIL handling is Python-specific. For Node we can rely on `#[napi] async fn` support (which produces Promises) or custom `AsyncTask`. The shared Tokio runtime can stay, but cancellation and context propagation must integrate with Node's event loop instead of Python futures.
 - **Type conversions**: `Extractor`, `PyBackedStr`, `PyBuffer`, `PyAny` interactions must be replaced with `napi::Value`, `JsObject`, `JsBuffer`, `Env` conversions. Many helper types can be re-used if we introduce binding-neutral builders that accept owned Rust data.
@@ -50,6 +55,7 @@ The compiled module is surfaced to Python via `python/rnet/`, which mostly re-ex
 - **Packaging**: replace Maturin build steps with `napi-build`/`napi::bindgen`. Continuous integration will need Node toolchain and `npm` packaging.
 
 ## 6. Lowest-Resistance Migration Path
+
 1. **Isolate binding-agnostic core**
    - Move request/response logic, builder structs, error mapping, proxy/tls/http option wrappers into a `bindings/common` module or crate with plain Rust types (no PyO3). Many structs are already thin newtypes; we can strip the `#[pyclass]` attributes by introducing wrapper types in the PyO3 layer. The common core should expose:
      - `RnetClient` (wrapping `wreq::Client`) with async methods returning plain Rust futures.
@@ -79,12 +85,14 @@ The compiled module is surfaced to Python via `python/rnet/`, which mostly re-ex
    - Prepare `package.json` and npm publishing scripts; keep `py/` package intact during transition.
 
 ## 7. Risks & Open Questions
+
 - **Streaming + AsyncIterator parity**: mapping Python's iterables and WebSocket streaming to idiomatic JS may need additional buffering or Node stream bridges.
 - **Resource management**: Node does not have RAII context managers; ensure we expose explicit `close()` and rely on `Finalizer` hooks for cleanup.
 - **Backpressure and cancellation**: napi Promises lack built-in cancellation—additional APIs may be needed to propagate abort signals similar to `PyDoneCallback`.
 - **Emulation exposure**: confirm which emulation combinations are relevant to JavaScript users and whether to keep exhaustive enums or expose a smaller curated set.
 
 ## 8. Immediate Next Steps
+
 1. Carve out a `core` module encapsulating `Client`, `RequestParams`, `ResponseState`, `WsState`, `Error` without PyO3 types.
 2. Refactor PyO3 bindings to consume the new core and validate tests still pass.
 3. Prototype a minimal napi module (`#[napi] async fn get(url: String)`) that calls into the core.
