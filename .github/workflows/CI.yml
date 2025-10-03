@@ -124,15 +124,24 @@ jobs:
         if: ${{ contains(matrix.settings.target, 'unknown-linux-musl') || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
         shell: bash
         run: |
-          zig_bin="$(command -v zig)"
-          lib_dir="$(zig env | python -c 'import json,sys; print(json.load(sys.stdin)["lib_dir"])')"
-          if [[ -z "$lib_dir" ]]; then
-            echo "Failed to determine zig lib_dir" >&2
-            exit 1
-          fi
-          echo "ZIG_BIN=$zig_bin" >> "$GITHUB_ENV"
-          echo "ZIG_LIB_DIR=$lib_dir" >> "$GITHUB_ENV"
-          echo "ZIG_LIBC_DIR=$lib_dir/libc" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import json
+          import os
+          import subprocess
+
+          zig_bin = subprocess.check_output(['which', 'zig'], text=True).strip()
+          env = json.loads(subprocess.check_output(['zig', 'env'], text=True))
+          lib_dir = env.get('lib_dir', '').strip()
+
+          if not lib_dir:
+            raise SystemExit('Failed to determine zig lib_dir')
+
+          github_env_path = os.environ['GITHUB_ENV']
+          with open(github_env_path, 'a', encoding='utf-8') as fh:
+            fh.write(f"ZIG_BIN={zig_bin}\n")
+            fh.write(f"ZIG_LIB_DIR={lib_dir}\n")
+            fh.write(f"ZIG_LIBC_DIR={lib_dir}/libc\n")
+          PY
       - name: Configure zig toolchain
         if: ${{ contains(matrix.settings.target, 'unknown-linux-musl') || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
         shell: bash
