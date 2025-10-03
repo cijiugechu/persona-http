@@ -127,10 +127,24 @@ jobs:
           python - <<'PY'
           import json
           import os
+          import shutil
           import subprocess
 
-          zig_bin = subprocess.check_output(['which', 'zig'], text=True).strip()
-          env = json.loads(subprocess.check_output(['zig', 'env'], text=True))
+          zig_bin = shutil.which('zig')
+          if not zig_bin:
+            raise SystemExit('Unable to locate zig executable in PATH')
+
+          proc = subprocess.run([zig_bin, 'env'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+          raw_output = proc.stdout.strip() or proc.stderr.strip()
+
+          if not raw_output:
+            raise SystemExit('zig env produced no output')
+
+          try:
+            env = json.loads(raw_output)
+          except json.JSONDecodeError as exc:
+            raise SystemExit(f'Failed to parse zig env output: {raw_output}') from exc
+
           lib_dir = env.get('lib_dir', '').strip()
 
           if not lib_dir:
