@@ -117,9 +117,53 @@ jobs:
             target/
           key: ${{ matrix.settings.target }}-cargo-${{ matrix.settings.host }}
       - uses: mlugg/setup-zig@v2
-        if: ${{ contains(matrix.settings.target, 'musl') }}
+        if: ${{ contains(matrix.settings.target, 'musl') || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
         with:
           version: 0.15.1
+      - name: Capture zig environment
+        if: ${{ contains(matrix.settings.target, 'unknown-linux-musl') || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
+        shell: bash
+        run: |
+          zig_bin="$(command -v zig)"
+          lib_dir="$(zig env | awk -F'"' '/\\.lib_dir/ { print $2 }')"
+          echo "ZIG_BIN=$zig_bin" >> "$GITHUB_ENV"
+          echo "ZIG_LIB_DIR=$lib_dir" >> "$GITHUB_ENV"
+          echo "ZIG_LIBC_DIR=$lib_dir/libc" >> "$GITHUB_ENV"
+      - name: Configure zig toolchain
+        if: ${{ contains(matrix.settings.target, 'unknown-linux-musl') || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
+        shell: bash
+        run: |
+          target="${{ matrix.settings.target }}"
+          if [[ -z "${ZIG_LIBC_DIR:-}" ]]; then
+            echo "ZIG_LIBC_DIR is not set" >&2
+            exit 1
+          fi
+          if [[ -z "${ZIG_LIB_DIR:-}" ]]; then
+            echo "ZIG_LIB_DIR is not set" >&2
+            exit 1
+          fi
+          zig_target="${target/-unknown/}"
+          env_suffix="${target//-/_}"
+          echo "CC=$GITHUB_WORKSPACE/ci/zig-cc-wrapper.sh $zig_target" >> "$GITHUB_ENV"
+          echo "CC_${env_suffix}=$GITHUB_WORKSPACE/ci/zig-cc-wrapper.sh $zig_target" >> "$GITHUB_ENV"
+          echo "CXX=$GITHUB_WORKSPACE/ci/zig-cxx-wrapper.sh $zig_target" >> "$GITHUB_ENV"
+          echo "CXX_${env_suffix}=$GITHUB_WORKSPACE/ci/zig-cxx-wrapper.sh $zig_target" >> "$GITHUB_ENV"
+          echo "AR=zig ar" >> "$GITHUB_ENV"
+          echo "AR_${env_suffix}=zig ar" >> "$GITHUB_ENV"
+          echo "RANLIB=zig ranlib" >> "$GITHUB_ENV"
+          echo "RANLIB_${env_suffix}=zig ranlib" >> "$GITHUB_ENV"
+          arch_component="${zig_target%%-*}"
+          include_flags="--sysroot ${ZIG_LIBC_DIR}"
+          include_flags+=" -isystem ${ZIG_LIB_DIR}/include"
+          include_flags+=" -isystem ${ZIG_LIB_DIR}/libc/include/${zig_target}"
+          include_flags+=" -isystem ${ZIG_LIB_DIR}/libc/include/${arch_component}-linux-any"
+          include_flags+=" -isystem ${ZIG_LIB_DIR}/libc/include/any-linux-any"
+          if [[ "$zig_target" == *"linux-musl" ]]; then
+            include_flags+=" -isystem ${ZIG_LIB_DIR}/libc/include/generic-musl"
+          else
+            include_flags+=" -isystem ${ZIG_LIB_DIR}/libc/include/generic-glibc"
+          fi
+          echo "BINDGEN_EXTRA_CLANG_ARGS_${env_suffix}=--target=$target $include_flags" >> "$GITHUB_ENV"
       - name: Install cargo-zigbuild
         uses: taiki-e/install-action@v2
         if: ${{ contains(matrix.settings.target, 'musl') }}
@@ -169,13 +213,19 @@ jobs:
           environment_variables: DEBUG RUSTUP_IO_THREADS
           shell: bash
           run: |
-            sudo pkg install -y -f curl git cmake gmake node libnghttp2 npm
+            sudo pkg install -y -f curl git cmake gmake node libnghttp2 npm llvm
             sudo npm install -g corepack
             curl https://sh.rustup.rs -sSf --output rustup.sh
             sh rustup.sh -y --profile minimal --default-toolchain beta
             corepack prepare
             corepack enable
             source "$HOME/.cargo/env"
+            LLVM_CONFIG=$(command -v llvm-config || command -v llvm-config19 || command -v llvm-config18 || command -v llvm-config17)
+            if [ -z "$LLVM_CONFIG" ]; then
+              echo "llvm-config not found after installing llvm" >&2
+              exit 1
+            fi
+            export LIBCLANG_PATH="$($LLVM_CONFIG --libdir)"
             echo "~~~~ rustc --version ~~~~"
             rustc --version
             echo "~~~~ node -v ~~~~"
