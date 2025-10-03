@@ -120,11 +120,11 @@ jobs:
         if: ${{ contains(matrix.settings.target, 'musl') || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
         with:
           version: 0.15.1
-        - name: Capture zig environment
-          if: ${{ contains(matrix.settings.target, 'unknown-linux-musl') || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
-          shell: bash
-          run: |
-            python - <<'PY'
+      - name: Capture zig environment
+        if: ${{ contains(matrix.settings.target, 'unknown-linux-musl') || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
+        shell: bash
+        run: |
+          python - <<'PY'
             import os
             import pathlib
             import re
@@ -164,7 +164,7 @@ jobs:
               fh.write(f"ZIG_BIN={zig_bin}\n")
               fh.write(f"ZIG_LIB_DIR={lib_dir}\n")
               fh.write(f"ZIG_LIBC_DIR={libc_dir}\n")
-            PY
+          PY
       - name: Configure zig toolchain
         if: ${{ contains(matrix.settings.target, 'unknown-linux-musl') || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
         shell: bash
