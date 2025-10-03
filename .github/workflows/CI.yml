@@ -125,7 +125,7 @@ jobs:
         shell: bash
         run: |
           zig_bin="$(command -v zig)"
-          lib_dir="$(zig env | awk -F'"' '/\\.lib_dir/ { print $2 }')"
+          lib_dir="$(zig env | awk -F'"' '/\.lib_dir/ { print $2 }')"
           echo "ZIG_BIN=$zig_bin" >> "$GITHUB_ENV"
           echo "ZIG_LIB_DIR=$lib_dir" >> "$GITHUB_ENV"
           echo "ZIG_LIBC_DIR=$lib_dir/libc" >> "$GITHUB_ENV"
