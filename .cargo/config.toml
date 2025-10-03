@@ -2,6 +2,11 @@
 CFLAGS_x86_64_unknown_linux_musl = "-DOPENSSL_NO_ASM"
 CXXFLAGS_x86_64_unknown_linux_musl = "-DOPENSSL_NO_ASM"
 ASMFLAGS_x86_64_unknown_linux_musl = "-DOPENSSL_NO_ASM"
+CFLAGS_aarch64_unknown_linux_musl = "-DOPENSSL_NO_ASM"
+CXXFLAGS_aarch64_unknown_linux_musl = "-DOPENSSL_NO_ASM"
+ASMFLAGS_aarch64_unknown_linux_musl = "-DOPENSSL_NO_ASM"
+CMAKE_TOOLCHAIN_FILE_x86_64_unknown_linux_musl = { value = "cmake/toolchains/zig-musl-x86_64.cmake", relative = true }
+CMAKE_TOOLCHAIN_FILE_aarch64_unknown_linux_musl = { value = "cmake/toolchains/zig-musl-aarch64.cmake", relative = true }
 
 [target.x86_64-pc-windows-msvc]
 rustflags = ["-C", "target-feature=+crt-static"]
