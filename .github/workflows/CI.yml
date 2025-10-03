@@ -134,7 +134,7 @@ jobs:
           if not zig_bin:
             raise SystemExit('Unable to locate zig executable in PATH')
 
-          proc = subprocess.run([zig_bin, 'env'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+          proc = subprocess.run([zig_bin, 'env', '--json'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
           raw_output = proc.stdout.strip() or proc.stderr.strip()
 
           if not raw_output:
