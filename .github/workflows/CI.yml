@@ -125,8 +125,8 @@ jobs:
         shell: bash
         run: |
           python - <<'PY'
-          import json
           import os
+          import pathlib
           import shutil
           import subprocess
 
@@ -134,27 +134,27 @@ jobs:
           if not zig_bin:
             raise SystemExit('Unable to locate zig executable in PATH')
 
-          proc = subprocess.run([zig_bin, 'env', '--json'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-          raw_output = proc.stdout.strip() or proc.stderr.strip()
+          def read_env_value(key: str) -> str:
+            proc = subprocess.run(
+              [zig_bin, 'env', key],
+              check=True,
+              stdout=subprocess.PIPE,
+              stderr=subprocess.PIPE,
+              text=True,
+            )
+            value = (proc.stdout or proc.stderr).strip()
+            if not value:
+              raise SystemExit(f'zig env {key} returned empty output')
+            return value
 
-          if not raw_output:
-            raise SystemExit('zig env produced no output')
-
-          try:
-            env = json.loads(raw_output)
-          except json.JSONDecodeError as exc:
-            raise SystemExit(f'Failed to parse zig env output: {raw_output}') from exc
-
-          lib_dir = env.get('lib_dir', '').strip()
-
-          if not lib_dir:
-            raise SystemExit('Failed to determine zig lib_dir')
+          lib_dir = read_env_value('ZIG_LIB_DIR')
+          libc_dir = pathlib.Path(lib_dir) / 'libc'
 
           github_env_path = os.environ['GITHUB_ENV']
           with open(github_env_path, 'a', encoding='utf-8') as fh:
             fh.write(f"ZIG_BIN={zig_bin}\n")
             fh.write(f"ZIG_LIB_DIR={lib_dir}\n")
-            fh.write(f"ZIG_LIBC_DIR={lib_dir}/libc\n")
+            fh.write(f"ZIG_LIBC_DIR={libc_dir}\n")
           PY
       - name: Configure zig toolchain
         if: ${{ contains(matrix.settings.target, 'unknown-linux-musl') || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
