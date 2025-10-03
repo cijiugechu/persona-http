@@ -120,42 +120,51 @@ jobs:
         if: ${{ contains(matrix.settings.target, 'musl') || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
         with:
           version: 0.15.1
-      - name: Capture zig environment
-        if: ${{ contains(matrix.settings.target, 'unknown-linux-musl') || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
-        shell: bash
-        run: |
-          python - <<'PY'
-          import os
-          import pathlib
-          import shutil
-          import subprocess
+        - name: Capture zig environment
+          if: ${{ contains(matrix.settings.target, 'unknown-linux-musl') || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
+          shell: bash
+          run: |
+            python - <<'PY'
+            import os
+            import pathlib
+            import re
+            import shutil
+            import subprocess
 
-          zig_bin = shutil.which('zig')
-          if not zig_bin:
-            raise SystemExit('Unable to locate zig executable in PATH')
+            zig_bin = shutil.which('zig')
+            if not zig_bin:
+              raise SystemExit('Unable to locate zig executable in PATH')
 
-          def read_env_value(key: str) -> str:
             proc = subprocess.run(
-              [zig_bin, 'env', key],
+              [zig_bin, 'env'],
               check=True,
               stdout=subprocess.PIPE,
               stderr=subprocess.PIPE,
               text=True,
             )
-            value = (proc.stdout or proc.stderr).strip()
-            if not value:
-              raise SystemExit(f'zig env {key} returned empty output')
-            return value
 
-          lib_dir = read_env_value('ZIG_LIB_DIR')
-          libc_dir = pathlib.Path(lib_dir) / 'libc'
+            output = (proc.stdout or proc.stderr).strip()
+            if not output:
+              raise SystemExit('zig env returned empty output')
 
-          github_env_path = os.environ['GITHUB_ENV']
-          with open(github_env_path, 'a', encoding='utf-8') as fh:
-            fh.write(f"ZIG_BIN={zig_bin}\n")
-            fh.write(f"ZIG_LIB_DIR={lib_dir}\n")
-            fh.write(f"ZIG_LIBC_DIR={libc_dir}\n")
-          PY
+            def extract(field: str) -> str:
+              pattern = rf"\\.{field}\\s*=\\s*\"([^\"]+)\""
+              match = re.search(pattern, output)
+              if not match:
+                raise SystemExit(f'Unable to locate {field} in zig env output: {output[:200]}')
+              return match.group(1)
+
+            lib_dir = extract('lib_dir')
+            libc_dir = pathlib.Path(lib_dir) / 'libc'
+            if not libc_dir.exists():
+              raise SystemExit(f'Computed Zig libc directory does not exist: {libc_dir}')
+
+            github_env_path = os.environ['GITHUB_ENV']
+            with open(github_env_path, 'a', encoding='utf-8') as fh:
+              fh.write(f"ZIG_BIN={zig_bin}\n")
+              fh.write(f"ZIG_LIB_DIR={lib_dir}\n")
+              fh.write(f"ZIG_LIBC_DIR={libc_dir}\n")
+            PY
       - name: Configure zig toolchain
         if: ${{ contains(matrix.settings.target, 'unknown-linux-musl') || matrix.settings.target == 'aarch64-unknown-linux-gnu' }}
         shell: bash
