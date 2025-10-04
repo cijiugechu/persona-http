@@ -32,16 +32,16 @@ const __sharedMemory = new WebAssembly.Memory({
   shared: true,
 })
 
-let __wasmFilePath = __nodePath.join(__dirname, 'rnet-node.wasm32-wasi.wasm')
-const __wasmDebugFilePath = __nodePath.join(__dirname, 'rnet-node.wasm32-wasi.debug.wasm')
+let __wasmFilePath = __nodePath.join(__dirname, 'nitai.wasm32-wasi.wasm')
+const __wasmDebugFilePath = __nodePath.join(__dirname, 'nitai.wasm32-wasi.debug.wasm')
 
 if (__nodeFs.existsSync(__wasmDebugFilePath)) {
   __wasmFilePath = __wasmDebugFilePath
 } else if (!__nodeFs.existsSync(__wasmFilePath)) {
   try {
-    __wasmFilePath = __nodePath.resolve('rnet-node-wasm32-wasi')
+    __wasmFilePath = __nodePath.resolve('nitai-wasm32-wasi')
   } catch {
-    throw new Error('Cannot find rnet-node.wasm32-wasi.wasm file, and rnet-node-wasm32-wasi package is not installed.')
+    throw new Error('Cannot find nitai.wasm32-wasi.wasm file, and nitai-wasm32-wasi package is not installed.')
   }
 }
 

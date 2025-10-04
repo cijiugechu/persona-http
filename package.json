@@ -1,12 +1,12 @@
 {
-  "name": "rnet-node",
+  "name": "nitai",
   "version": "0.1.0",
   "description": "A blazing-fast HTTP Client with TLS fingerprint",
   "main": "index.js",
   "types": "index.d.ts",
   "browser": "browser.js",
   "repository": {
-    "url": "git+ssh://git@github.com/cijiugechu/rnet-node.git",
+    "url": "git+ssh://git@github.com/cijiugechu/nitai.git",
     "type": "git"
   },
   "license": "MIT",
@@ -22,7 +22,7 @@
     "browser.js"
   ],
   "napi": {
-    "binaryName": "rnet-node",
+    "binaryName": "nitai",
     "targets": [
       "x86_64-apple-darwin",
       "aarch64-apple-darwin",

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use napi::bindgen_prelude::{Either, Result as NapiResult};
 use napi_derive::napi;
-use rnet_bindings_core::client::{ClientBuilder, TlsVerification};
+use nitai_bindings_core::client::{ClientBuilder, TlsVerification};
 use wreq::tls;
 
 use crate::emulation::{parse_optional_emulation, EmulationOptions};

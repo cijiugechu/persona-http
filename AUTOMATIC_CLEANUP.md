@@ -129,13 +129,13 @@ Without these, the underlying HTTP connection and body stream would remain open,
 
 ## Comparison with Other Libraries
 
-| Library                | Cleanup Method            | Manual Close Required |
-| ---------------------- | ------------------------- | --------------------- |
-| **undici**             | FinalizationRegistry      | No ❌                 |
-| **node-fetch**         | FinalizationRegistry      | No ❌                 |
-| **Fetch API**          | Browser GC + Stream locks | No ❌                 |
-| **rnet-node (before)** | Manual `close()`          | Yes ⚠️                |
-| **rnet-node (now)**    | Drop trait                | No ✅                 |
+| Library            | Cleanup Method            | Manual Close Required |
+| ------------------ | ------------------------- | --------------------- |
+| **undici**         | FinalizationRegistry      | No ❌                 |
+| **node-fetch**     | FinalizationRegistry      | No ❌                 |
+| **Fetch API**      | Browser GC + Stream locks | No ❌                 |
+| **nitai (before)** | Manual `close()`          | Yes ⚠️                |
+| **nitai (now)**    | Drop trait                | No ✅                 |
 
 ## Migration Guide
 

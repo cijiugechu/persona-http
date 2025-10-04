@@ -12,7 +12,7 @@ pub use response_handle::{RedirectHistoryEntry, ResponseHandle};
 
 use napi::bindgen_prelude::*;
 use napi_derive::napi;
-use rnet_bindings_core::{
+use nitai_bindings_core::{
   client::{Client as CoreClient, ClientBuilder},
   execute_request,
 };

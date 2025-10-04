@@ -5,7 +5,7 @@ use std::sync::Arc;
 use http::Version;
 use napi::bindgen_prelude::{Buffer, Result};
 use napi_derive::napi;
-use rnet_bindings_core::response::Response;
+use nitai_bindings_core::response::Response;
 use wreq::header::{HeaderMap, HeaderValue};
 
 use crate::error::to_napi_error;

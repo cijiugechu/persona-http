@@ -1,1 +1,1 @@
-export * from 'rnet-node-wasm32-wasi'
+export * from 'nitai-wasm32-wasi'

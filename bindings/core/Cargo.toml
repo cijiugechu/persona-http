@@ -1,5 +1,5 @@
 [package]
-name = "rnet_bindings_core"
+name = "nitai_bindings_core"
 version = "0.1.0"
 edition = "2021"
 

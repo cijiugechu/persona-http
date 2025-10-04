@@ -5,7 +5,7 @@ use std::time::Duration;
 use napi::bindgen_prelude::{Buffer, Either, Result as NapiResult};
 use napi::{Error as NapiError, Status};
 use napi_derive::napi;
-use rnet_bindings_core::request::{Request, WebSocketRequest};
+use nitai_bindings_core::request::{Request, WebSocketRequest};
 use wreq::header::{HeaderMap, HeaderName, HeaderValue};
 use wreq::{self, Method, Proxy, Version};
 
