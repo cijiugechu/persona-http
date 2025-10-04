@@ -1,85 +1,80 @@
-# `rnet-node`
+# rnet-node
 
-![https://github.com/cijiugechu/rnet-node/actions](https://github.com/cijiugechu/rnet-node/workflows/CI/badge.svg)
+![CI](https://github.com/cijiugechu/rnet-node/workflows/CI/badge.svg)
 
-> Template project for writing node packages with napi-rs.
+A blazing-fast HTTP client with TLS fingerprinting for Node.js. Native Rust bindings via napi-rs.
 
-# Usage
+Based on [rnet](https://github.com/0x676e67/rnet) - the original Python implementation.
 
-1. Click **Use this template**.
-2. **Clone** your project.
-3. Run `pnpm install` to install dependencies.
-4. Run `npx napi rename -n [name]` command under the project folder to rename your package.
+## Installation
 
-## Install this test package
-
-```
-pnpm add rnet-node
+```bash
+npm install rnet-node
 ```
 
 ## Usage
 
-### Build
+### Simple GET request
 
-After `pnpm build` command, you can see `package-template.[darwin|win32|linux].node` file in project root. This is the native addon built from [lib.rs](./src/lib.rs).
+```typescript
+import { get } from 'rnet-node'
 
-### Test
+const response = await get('https://example.com')
+const body = await response.text()
+```
 
-With [ava](https://github.com/avajs/ava), run `pnpm test` to testing native addon. You can also switch to another testing framework if you want.
+### Client with browser emulation
 
-### CI
+```typescript
+import { Client } from 'rnet-node'
 
-With GitHub Actions, each commit and pull request will be built and tested automatically in [`node@18`, `node@20`] x [`macOS`, `Linux`, `Windows`] matrix. You will never be afraid of the native addon broken in these platforms.
+const client = new Client({
+  emulation: 'chrome_133'
+})
 
-### Release
+const response = await client.get('https://google.com')
+const body = await response.text()
+```
 
-Release native package is very difficult in old days. Native packages may ask developers who use it to install `build toolchain` like `gcc/llvm`, `node-gyp` or something more.
+### Override emulation per request
 
-With `GitHub actions`, we can easily prebuild a `binary` for major platforms. And with `N-API`, we should never be afraid of **ABI Compatible**.
+```typescript
+const client = new Client({ emulation: 'chrome_105' })
 
-The other problem is how to deliver prebuild `binary` to users. Downloading it in `postinstall` script is a common way that most packages do it right now. The problem with this solution is it introduced many other packages to download binary that has not been used by `runtime codes`. The other problem is some users may not easily download the binary from `GitHub/CDN` if they are behind a private network (But in most cases, they have a private NPM mirror).
+// Override with different preset
+const response = await client.get(url, { emulation: 'chrome_101' })
 
-In this package, we choose a better way to solve this problem. We release different `npm packages` for different platforms. And add it to `optionalDependencies` before releasing the `Major` package to npm.
+// Skip client hint headers
+const response2 = await client.get(url, { 
+  emulation: { preset: 'chrome_105', skipHeaders: true } 
+})
+```
 
-`NPM` will choose which native package should download from `registry` automatically. You can see [npm](./npm) dir for details. And you can also run `pnpm add @cijiugechu/rnet-node` to see how it works.
+## Platform Support
 
-## Develop requirements
+| Platform | Architectures | Node.js |
+|----------|--------------|---------|
+| macOS | x64, arm64 | 20, 22 |
+| Windows | x64, x86, arm64 | 20, 22 |
+| Linux (glibc) | x64, arm64 | 20, 22 |
+| Linux (musl) | x64, arm64 | 20, 22 |
+| FreeBSD | x64 | 20, 22 |
+| Android | arm64, armv7 | - |
 
-- Install the latest `Rust`
-- Install `Node.js@16+` which fully supported `Node-API`
-- Run `corepack enable`
+## Development
 
-## Test in local
-
+Requirements:
+- Rust (latest stable)
+- Node.js 20+
 - pnpm
-- pnpm build
-- pnpm test
 
-And you will see:
-
+Build and test:
 ```bash
-$ ava --verbose
-
-  ✔ sync function from native code
-  ✔ sleep function from native code (201ms)
-  ─
-
-  2 tests passed
-✨  Done in 1.12s.
+pnpm install
+pnpm build
+pnpm test
 ```
 
-## Release package
+## License
 
-Ensure you have set your **NPM_TOKEN** in the `GitHub` project setting.
-
-In `Settings -> Secrets`, add **NPM_TOKEN** into it.
-
-When you want to release the package:
-
-```
-npm version [<newversion> | major | minor | patch | premajor | preminor | prepatch | prerelease [--preid=<prerelease-id>] | from-git]
-
-git push
-```
-
-GitHub actions will do the rest job for you.
+MIT
