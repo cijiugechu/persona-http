@@ -57,7 +57,7 @@ impl ResponseHandle {
   }
 
   pub fn from_shared(inner: Arc<Response>) -> Self {
-    Self { 
+    Self {
       inner,
       consumed: Arc::new(AtomicBool::new(false)),
     }
@@ -66,7 +66,7 @@ impl ResponseHandle {
   pub fn as_shared(&self) -> Arc<Response> {
     Arc::clone(&self.inner)
   }
-  
+
   fn mark_consumed(&self) {
     self.consumed.store(true, Ordering::Release);
   }
