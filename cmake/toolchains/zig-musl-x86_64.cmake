@@ -19,4 +19,7 @@ set(CMAKE_ASM_COMPILER_ARG1 "x86_64-linux-musl")
 set(CMAKE_AR "${WORKSPACE}/ci/zig-ar-wrapper.sh" CACHE FILEPATH "Archiver")
 set(CMAKE_RANLIB "${WORKSPACE}/ci/zig-ranlib-wrapper.sh" CACHE FILEPATH "Ranlib")
 
+# Disable assembly for BoringSSL when cross-compiling with Zig
+set(OPENSSL_NO_ASM ON CACHE BOOL "Disable assembly" FORCE)
+
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
