@@ -127,6 +127,7 @@ jobs:
           zig_bin="$(command -v zig)"
           lib_dir="$(zig env | awk -F'"' '/\.lib_dir/ { print $2 }')"
           echo "ZIG_BIN=$zig_bin" >> "$GITHUB_ENV"
+          echo "ZIG_EXECUTABLE=$zig_bin" >> "$GITHUB_ENV"
           echo "ZIG_LIB_DIR=$lib_dir" >> "$GITHUB_ENV"
           echo "ZIG_LIBC_DIR=$lib_dir/libc" >> "$GITHUB_ENV"
       - name: Configure zig toolchain
@@ -160,6 +161,14 @@ jobs:
           include_flags+=" -isystem ${ZIG_LIB_DIR}/libc/include/any-linux-any"
           if [[ "$zig_target" == *"linux-musl" ]]; then
             include_flags+=" -isystem ${ZIG_LIB_DIR}/libc/include/generic-musl"
+            # Set CMAKE_TOOLCHAIN_FILE for musl targets to properly configure BoringSSL build
+            if [[ "$target" == "x86_64-unknown-linux-musl" ]]; then
+              echo "CMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/cmake/toolchains/zig-musl-x86_64.cmake" >> "$GITHUB_ENV"
+              echo "CMAKE_TOOLCHAIN_FILE_${env_suffix}=$GITHUB_WORKSPACE/cmake/toolchains/zig-musl-x86_64.cmake" >> "$GITHUB_ENV"
+            elif [[ "$target" == "aarch64-unknown-linux-musl" ]]; then
+              echo "CMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/cmake/toolchains/zig-musl-aarch64.cmake" >> "$GITHUB_ENV"
+              echo "CMAKE_TOOLCHAIN_FILE_${env_suffix}=$GITHUB_WORKSPACE/cmake/toolchains/zig-musl-aarch64.cmake" >> "$GITHUB_ENV"
+            fi
           else
             include_flags+=" -isystem ${ZIG_LIB_DIR}/libc/include/generic-glibc"
           fi
