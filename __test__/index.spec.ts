@@ -39,7 +39,6 @@ test('get', async (t) => {
   try {
     const response = await get(server.url)
     const body = (await response.json()) as HeaderPayload
-    response.close()
     t.truthy(body.headers.host)
   } finally {
     await server.close()
@@ -53,7 +52,6 @@ test('tls', async (t) => {
   })
   const response = await client.get(url)
   const body = await response.text()
-  response.close()
   t.truthy(body)
 })
 
@@ -63,7 +61,6 @@ test('client emulation applies chrome preset', async (t) => {
     const client = new Client({ emulation: 'chrome_105' })
     const response = await client.get(server.url)
     const body = (await response.json()) as HeaderPayload
-    response.close()
     const userAgent = body.headers['user-agent']
     t.truthy(userAgent && userAgent.includes('Chrome/105'))
     t.truthy(body.headers['sec-ch-ua'])
@@ -78,7 +75,6 @@ test('request emulation overrides client preset', async (t) => {
     const client = new Client({ emulation: 'chrome_105' })
     const response = await client.get(server.url, { emulation: 'chrome_101' })
     const body = (await response.json()) as HeaderPayload
-    response.close()
     const userAgent = body.headers['user-agent']
     t.truthy(userAgent && userAgent.includes('Chrome/101'))
   } finally {
@@ -93,13 +89,11 @@ test('skipHeaders disables client hint headers', async (t) => {
 
     const responseWithHeaders = await client.get(server.url, { emulation: 'chrome_105' })
     const bodyWithHeaders = (await responseWithHeaders.json()) as HeaderPayload
-    responseWithHeaders.close()
 
     const responseWithoutHeaders = await client.get(server.url, {
       emulation: { preset: 'chrome_105', skipHeaders: true },
     })
     const bodyWithoutHeaders = (await responseWithoutHeaders.json()) as HeaderPayload
-    responseWithoutHeaders.close()
 
     t.truthy(bodyWithHeaders.headers['sec-ch-ua'])
     t.is(bodyWithoutHeaders.headers['sec-ch-ua'], undefined)

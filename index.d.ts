@@ -12,6 +12,32 @@ export declare class Client {
   options(url: string, init?: RequestInit | undefined | null): Promise<ResponseHandle>
 }
 
+/**
+ * HTTP response handle with automatic resource cleanup.
+ *
+ * Response resources (connections, body streams) are automatically cleaned up when
+ * the object is garbage collected, similar to undici and the Fetch API.
+ *
+ * # Automatic Cleanup
+ *
+ * You don't need to manually call `close()` - resources are automatically released when:
+ * - The response body is consumed via `text()`, `json()`, or `bytes()`
+ * - The JavaScript object is garbage collected
+ *
+ * # Example
+ *
+ * ```javascript
+ * // Automatic cleanup - no close() needed
+ * const response = await client.get('https://api.example.com/data');
+ * const data = await response.json();
+ * // Resources automatically cleaned up
+ *
+ * // Optional explicit cleanup
+ * const response = await client.get('https://api.example.com/data');
+ * console.log(response.status);
+ * response.close(); // Immediate cleanup (optional)
+ * ```
+ */
 export declare class ResponseHandle {
   get status(): number
   get ok(): boolean
@@ -24,9 +50,42 @@ export declare class ResponseHandle {
   get localAddr(): string | null
   get remoteAddr(): string | null
   history(): Array<RedirectHistoryEntry>
+  /**
+   * Reads the response body as text.
+   * The response is automatically cleaned up after consumption.
+   */
   text(): Promise<string>
+  /**
+   * Reads the response body as JSON.
+   * The response is automatically cleaned up after consumption.
+   */
   json(): Promise<any>
+  /**
+   * Reads the response body as raw bytes.
+   * The response is automatically cleaned up after consumption.
+   */
   bytes(): Promise<Buffer>
+  /**
+   * Explicitly closes the response and releases resources immediately.
+   *
+   * **Note:** This method is optional. Response resources are automatically
+   * cleaned up when the object is garbage collected (similar to undici/fetch).
+   * Use this method only when you need immediate resource cleanup, such as in
+   * high-volume scenarios or long-running processes.
+   *
+   * # Example
+   * ```javascript
+   * // Automatic cleanup (recommended)
+   * const response = await client.get(url);
+   * const data = await response.json();
+   * // No close() needed - automatic cleanup on GC
+   *
+   * // Explicit cleanup (optional)
+   * const response = await client.get(url);
+   * console.log(response.status);
+   * response.close(); // Immediate cleanup
+   * ```
+   */
   close(): void
 }
 

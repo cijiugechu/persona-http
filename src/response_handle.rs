@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
 use http::Version;
@@ -9,9 +10,35 @@ use wreq::header::{HeaderMap, HeaderValue};
 
 use crate::error::to_napi_error;
 
+/// HTTP response handle with automatic resource cleanup.
+///
+/// Response resources (connections, body streams) are automatically cleaned up when
+/// the object is garbage collected, similar to undici and the Fetch API.
+///
+/// # Automatic Cleanup
+///
+/// You don't need to manually call `close()` - resources are automatically released when:
+/// - The response body is consumed via `text()`, `json()`, or `bytes()`
+/// - The JavaScript object is garbage collected
+///
+/// # Example
+///
+/// ```javascript
+/// // Automatic cleanup - no close() needed
+/// const response = await client.get('https://api.example.com/data');
+/// const data = await response.json();
+/// // Resources automatically cleaned up
+///
+/// // Optional explicit cleanup
+/// const response = await client.get('https://api.example.com/data');
+/// console.log(response.status);
+/// response.close(); // Immediate cleanup (optional)
+/// ```
 #[napi]
 pub struct ResponseHandle {
   inner: Arc<Response>,
+  /// Track if the body has been consumed to avoid closing prematurely
+  consumed: Arc<AtomicBool>,
 }
 
 #[napi(object)]
@@ -25,15 +52,23 @@ impl ResponseHandle {
   pub fn new(response: Response) -> Self {
     Self {
       inner: Arc::new(response),
+      consumed: Arc::new(AtomicBool::new(false)),
     }
   }
 
   pub fn from_shared(inner: Arc<Response>) -> Self {
-    Self { inner }
+    Self { 
+      inner,
+      consumed: Arc::new(AtomicBool::new(false)),
+    }
   }
 
   pub fn as_shared(&self) -> Arc<Response> {
     Arc::clone(&self.inner)
+  }
+  
+  fn mark_consumed(&self) {
+    self.consumed.store(true, Ordering::Release);
   }
 }
 
@@ -108,25 +143,68 @@ impl ResponseHandle {
       .collect()
   }
 
+  /// Reads the response body as text.
+  /// The response is automatically cleaned up after consumption.
   #[napi]
   pub async fn text(&self) -> Result<String> {
-    self.inner.text().await.map_err(to_napi_error)
+    let result = self.inner.text().await.map_err(to_napi_error)?;
+    self.mark_consumed();
+    Ok(result)
   }
 
+  /// Reads the response body as JSON.
+  /// The response is automatically cleaned up after consumption.
   #[napi]
   pub async fn json(&self) -> Result<serde_json::Value> {
-    self.inner.json().await.map_err(to_napi_error)
+    let result = self.inner.json().await.map_err(to_napi_error)?;
+    self.mark_consumed();
+    Ok(result)
   }
 
+  /// Reads the response body as raw bytes.
+  /// The response is automatically cleaned up after consumption.
   #[napi]
   pub async fn bytes(&self) -> Result<Buffer> {
     let bytes = self.inner.bytes().await.map_err(to_napi_error)?;
+    self.mark_consumed();
     Ok(bytes.to_vec().into())
   }
 
+  /// Explicitly closes the response and releases resources immediately.
+  ///
+  /// **Note:** This method is optional. Response resources are automatically
+  /// cleaned up when the object is garbage collected (similar to undici/fetch).
+  /// Use this method only when you need immediate resource cleanup, such as in
+  /// high-volume scenarios or long-running processes.
+  ///
+  /// # Example
+  /// ```javascript
+  /// // Automatic cleanup (recommended)
+  /// const response = await client.get(url);
+  /// const data = await response.json();
+  /// // No close() needed - automatic cleanup on GC
+  ///
+  /// // Explicit cleanup (optional)
+  /// const response = await client.get(url);
+  /// console.log(response.status);
+  /// response.close(); // Immediate cleanup
+  /// ```
   #[napi]
   pub fn close(&self) {
     self.inner.close();
+    self.mark_consumed();
+  }
+}
+
+// Implement Drop trait for automatic cleanup when JavaScript object is garbage collected
+// This provides the same behavior as undici/fetch where users don't need to manually close responses
+impl Drop for ResponseHandle {
+  fn drop(&mut self) {
+    // Only close if the response body was never consumed
+    // This prevents closing an already-consumed response and avoids double-free issues
+    if !self.consumed.load(Ordering::Acquire) {
+      self.inner.close();
+    }
   }
 }
 
