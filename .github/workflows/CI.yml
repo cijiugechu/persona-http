@@ -191,6 +191,12 @@ jobs:
         shell: bash
       - name: Install dependencies
         run: pnpm install
+      - name: Configure armv7 toolchain
+        if: matrix.settings.target == 'armv7-unknown-linux-gnueabihf'
+        shell: bash
+        run: |
+          echo "CMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/cmake/toolchains/napi-armv7-gnueabihf.cmake" >> "$GITHUB_ENV"
+          echo "CMAKE_TOOLCHAIN_FILE_armv7_unknown_linux_gnueabihf=$GITHUB_WORKSPACE/cmake/toolchains/napi-armv7-gnueabihf.cmake" >> "$GITHUB_ENV"
       - name: Setup node x86
         uses: actions/setup-node@v5
         if: matrix.settings.target == 'i686-pc-windows-msvc'
