@@ -1,0 +1,35 @@
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR armv7)
+
+# Use the napi-rs cross-compilation toolchain
+if(DEFINED ENV{TARGET_CC})
+  set(CMAKE_C_COMPILER "$ENV{TARGET_CC}")
+else()
+  message(FATAL_ERROR "TARGET_CC environment variable is not set")
+endif()
+
+if(DEFINED ENV{TARGET_CXX})
+  set(CMAKE_CXX_COMPILER "$ENV{TARGET_CXX}")
+else()
+  message(FATAL_ERROR "TARGET_CXX environment variable is not set")
+endif()
+
+if(DEFINED ENV{TARGET_AR})
+  set(CMAKE_AR "$ENV{TARGET_AR}" CACHE FILEPATH "Archiver")
+endif()
+
+if(DEFINED ENV{TARGET_RANLIB})
+  set(CMAKE_RANLIB "$ENV{TARGET_RANLIB}" CACHE FILEPATH "Ranlib")
+endif()
+
+# Set sysroot if available
+if(DEFINED ENV{TARGET_SYSROOT})
+  set(CMAKE_SYSROOT "$ENV{TARGET_SYSROOT}")
+  set(CMAKE_FIND_ROOT_PATH "$ENV{TARGET_SYSROOT}")
+  set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+  set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+  set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+endif()
+
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+

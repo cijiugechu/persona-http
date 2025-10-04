@@ -171,6 +171,11 @@ jobs:
             fi
           else
             include_flags+=" -isystem ${ZIG_LIB_DIR}/libc/include/generic-glibc"
+            # Set CMAKE_TOOLCHAIN_FILE for aarch64-unknown-linux-gnu to properly configure BoringSSL build
+            if [[ "$target" == "aarch64-unknown-linux-gnu" ]]; then
+              echo "CMAKE_TOOLCHAIN_FILE=$GITHUB_WORKSPACE/cmake/toolchains/zig-gnu-aarch64.cmake" >> "$GITHUB_ENV"
+              echo "CMAKE_TOOLCHAIN_FILE_${env_suffix}=$GITHUB_WORKSPACE/cmake/toolchains/zig-gnu-aarch64.cmake" >> "$GITHUB_ENV"
+            fi
           fi
           echo "BINDGEN_EXTRA_CLANG_ARGS_${env_suffix}=--target=$target $include_flags" >> "$GITHUB_ENV"
       - name: Install cargo-zigbuild
