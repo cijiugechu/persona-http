@@ -9,6 +9,8 @@ use rnet_bindings_core::request::{Request, WebSocketRequest};
 use wreq::header::{HeaderMap, HeaderName, HeaderValue};
 use wreq::{self, Method, Proxy, Version};
 
+use crate::emulation::{parse_optional_emulation, EmulationOptions};
+
 #[napi(object)]
 pub struct BasicAuth {
   pub username: String,
@@ -28,6 +30,7 @@ pub struct RequestInit {
   pub headers: Option<HashMap<String, Either<String, Vec<String>>>>,
   pub default_headers: Option<bool>,
   pub cookies: Option<Vec<String>>,
+  pub emulation: Option<Either<String, EmulationOptions>>,
   pub allow_redirects: Option<bool>,
   pub max_redirects: Option<u32>,
   pub gzip: Option<bool>,
@@ -54,6 +57,7 @@ pub struct WebSocketInit {
   pub headers: Option<HashMap<String, Either<String, Vec<String>>>>,
   pub default_headers: Option<bool>,
   pub cookies: Option<Vec<String>>,
+  pub emulation: Option<Either<String, EmulationOptions>>,
   pub auth: Option<String>,
   pub bearer_auth: Option<String>,
   pub basic_auth: Option<BasicAuth>,
@@ -98,6 +102,10 @@ impl WebSocketInit {
 
     if let Some(headers) = self.headers {
       request.headers = Some(convert_header_map(headers)?);
+    }
+
+    if let Some(emulation) = parse_optional_emulation(self.emulation)? {
+      request.emulation = Some(emulation);
     }
 
     if let Some(default_headers) = self.default_headers {
@@ -161,6 +169,7 @@ fn fill_request(request: &mut Request, init: RequestInit) -> NapiResult<Option<M
     headers,
     default_headers,
     cookies,
+    emulation,
     allow_redirects,
     max_redirects,
     gzip,
@@ -183,6 +192,10 @@ fn fill_request(request: &mut Request, init: RequestInit) -> NapiResult<Option<M
   } = init;
 
   let parsed_method = method.map(|value| parse_method(&value)).transpose()?;
+
+  if let Some(emulation) = parse_optional_emulation(emulation)? {
+    request.emulation = Some(emulation);
+  }
 
   if let Some(headers) = headers {
     request.headers = Some(convert_header_map(headers)?);

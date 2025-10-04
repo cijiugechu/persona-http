@@ -36,6 +36,7 @@ export interface BasicAuth {
 }
 
 export interface ClientInit {
+  emulation?: string | EmulationOptions
   userAgent?: string
   headers?: Record<string, string | Array<string>>
   referer?: boolean
@@ -76,6 +77,13 @@ export interface ClientInit {
 /** use this instead of delete because delete is a reserved keyword in JavaScript */
 export declare function delete_(url: string, init?: RequestInit | undefined | null): Promise<ResponseHandle>
 
+export interface EmulationOptions {
+  preset?: string
+  os?: string
+  skipHttp2?: boolean
+  skipHeaders?: boolean
+}
+
 export declare function get(url: string, init?: RequestInit | undefined | null): Promise<ResponseHandle>
 
 export declare function head(url: string, init?: RequestInit | undefined | null): Promise<ResponseHandle>
@@ -107,6 +115,7 @@ export interface RequestInit {
   headers?: Record<string, string | Array<string>>
   defaultHeaders?: boolean
   cookies?: Array<string>
+  emulation?: string | EmulationOptions
   allowRedirects?: boolean
   maxRedirects?: number
   gzip?: boolean
@@ -132,6 +141,7 @@ export interface WebSocketInit {
   headers?: Record<string, string | Array<string>>
   defaultHeaders?: boolean
   cookies?: Array<string>
+  emulation?: string | EmulationOptions
   auth?: string
   bearerAuth?: string
   basicAuth?: BasicAuth

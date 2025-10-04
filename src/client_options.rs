@@ -5,12 +5,14 @@ use napi_derive::napi;
 use rnet_bindings_core::client::{ClientBuilder, TlsVerification};
 use wreq::tls;
 
+use crate::emulation::{parse_optional_emulation, EmulationOptions};
 use crate::request_options::{
   convert_header_map, duration_from_millis, napi_invalid, parse_ip, parse_proxy, ProxyConfig,
 };
 
 #[napi(object)]
 pub struct ClientInit {
+  pub emulation: Option<Either<String, EmulationOptions>>,
   pub user_agent: Option<String>,
   pub headers: Option<HashMap<String, Either<String, Vec<String>>>>,
   pub referer: Option<bool>,
@@ -51,6 +53,10 @@ pub struct ClientInit {
 impl ClientInit {
   pub fn build(self) -> NapiResult<ClientBuilder> {
     let mut builder = ClientBuilder::default();
+
+    if let Some(emulation) = parse_optional_emulation(self.emulation)? {
+      builder.emulation = Some(emulation);
+    }
 
     if let Some(user_agent) = self.user_agent {
       builder.user_agent = Some(user_agent);

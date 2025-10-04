@@ -1,6 +1,7 @@
 #![deny(clippy::all)]
 
 mod client_options;
+mod emulation;
 mod error;
 mod request_options;
 mod response_handle;
