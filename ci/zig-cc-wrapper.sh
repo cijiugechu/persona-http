@@ -42,3 +42,4 @@ if [[ "$target_seen" == "false" ]]; then
 fi
 
 exec "$zig_bin" cc "${args[@]}"
+
