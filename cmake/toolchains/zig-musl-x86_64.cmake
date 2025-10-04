@@ -16,14 +16,7 @@ set(CMAKE_CXX_COMPILER_ARG1 "x86_64-linux-musl")
 set(CMAKE_ASM_COMPILER "${WORKSPACE}/ci/zig-cc-wrapper.sh")
 set(CMAKE_ASM_COMPILER_ARG1 "x86_64-linux-musl")
 
-if(NOT DEFINED ZIG_EXECUTABLE)
-  find_program(ZIG_EXECUTABLE zig REQUIRED)
-endif()
-
-set(CMAKE_AR "${ZIG_EXECUTABLE}" CACHE FILEPATH "Archiver")
-set(CMAKE_AR_ARG1 "ar")
-
-set(CMAKE_RANLIB "${ZIG_EXECUTABLE}" CACHE FILEPATH "Ranlib")
-set(CMAKE_RANLIB_ARG1 "ranlib")
+set(CMAKE_AR "${WORKSPACE}/ci/zig-ar-wrapper.sh" CACHE FILEPATH "Archiver")
+set(CMAKE_RANLIB "${WORKSPACE}/ci/zig-ranlib-wrapper.sh" CACHE FILEPATH "Ranlib")
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
