@@ -1,6 +1,6 @@
 
 [workspace]
-members = ["bindings/core","."]
+members = ["bindings/core", "."]
 resolver = "2"
 
 [package]
@@ -25,11 +25,11 @@ strum = "0.27.2"
 
 [dependencies.napi]
 version = "3.3.0"
-features = ["tokio_rt","serde-json"]
+features = ["tokio_rt", "serde-json"]
 
 [dependencies.tokio]
 version = "1.47"
-features = ["sync","rt","rt-multi-thread","time"]
+features = ["sync", "rt", "rt-multi-thread", "time"]
 
 [dependencies.futures-util]
 version = "0.3.31"
@@ -45,7 +45,19 @@ features = ["serde"]
 
 [dependencies.wreq]
 version = "6.0.0-rc.20"
-features = ["json","socks","stream","multipart","cookies","charset","gzip","brotli","deflate","zstd","ws"]
+features = [
+  "json",
+  "socks",
+  "stream",
+  "multipart",
+  "cookies",
+  "charset",
+  "gzip",
+  "brotli",
+  "deflate",
+  "zstd",
+  "ws",
+]
 
 [dependencies.wreq-util]
 version = "3.0.0-rc.5"
