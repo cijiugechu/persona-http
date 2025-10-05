@@ -1,6 +1,6 @@
-# nitai
+# persona-http
 
-![CI](https://github.com/cijiugechu/nitai/workflows/CI/badge.svg)
+![CI](https://github.com/cijiugechu/persona-http/workflows/CI/badge.svg)
 
 A blazing-fast HTTP client with TLS fingerprinting for Node.js. Native Rust bindings via napi-rs.
 
@@ -9,7 +9,7 @@ Based on [rnet](https://github.com/0x676e67/rnet) - the original Python implemen
 ## Installation
 
 ```bash
-npm install nitai
+npm install persona-http
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ npm install nitai
 ### Simple GET request
 
 ```typescript
-import { get } from 'nitai'
+import { get } from 'persona-http'
 
 const response = await get('https://example.com')
 const body = await response.text()
@@ -26,7 +26,7 @@ const body = await response.text()
 ### Client with browser emulation
 
 ```typescript
-import { Client } from 'nitai'
+import { Client } from 'persona-http'
 
 const client = new Client({
   emulation: 'chrome_133',
